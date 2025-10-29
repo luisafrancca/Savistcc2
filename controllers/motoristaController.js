@@ -1,6 +1,22 @@
-const { Usuario, Endereco, Genero, Motorista, Documento, Viagem, Status, CidadeConsul, Veiculo, Participante, Acompanhante } = require('../models');
-const { Op, where } = require('sequelize');
-const bcrypt = require('bcrypt');
+const {
+  Usuario,
+  Endereco,
+  Genero,
+  Motorista,
+  Chefe,
+  Documento,
+  Viagem,
+  Status,
+  CidadeConsul,
+  Solicitacao,
+  Acompanhante,
+  Participante,
+  Veiculo,
+  
+} = require("../models");
+const { Op } = require("sequelize");
+const { Sequelize } = require("sequelize");
+const bcrypt = require("bcrypt");
 
 exports.renderPerfil = async (req, res) => {
   try {
@@ -359,39 +375,54 @@ exports.verParticipantes = async (req, res) => {
 
     const cod = req.params.cod;
 
-    const viagem = await Viagem.findOne({
-      where: { cod },
+    // ----- PAGINAÇÃO -----
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const offset = (page - 1) * limit;
+
+    // ----- PESQUISA -----
+    const termo = req.query.q ? req.query.q.trim() : "";
+    const whereCondition = termo
+      ? {
+          viagemId: cod,
+          [Sequelize.Op.or]: [
+            { "$Usuario.nome$": { [Sequelize.Op.like]: `%${termo}%` } },
+            { "$Usuario.CPF$": { [Sequelize.Op.like]: `%${termo}%` } }
+          ]
+        }
+      : { viagemId: cod };
+
+    // ----- BUSCA DOS PARTICIPANTES -----
+    const { count, rows } = await Participante.findAndCountAll({
+      where: whereCondition,
       include: [
-        { model: Veiculo, as: "veiculo" },
-        {
-          model: Participante,
-          as: "participantes",
-          include: [
-            { model: Usuario, include: [{ model: Genero }, { model: Endereco }] },
-            { model: Acompanhante, include: [{ model: Genero }], as: "acompanhante" },
-          ],
-        },
+        { model: Usuario, include: [{ model: Genero }, { model: Endereco }] },
+        { model: Acompanhante, as: "acompanhante", include: [{ model: Genero }] }
       ],
+      order: [["cod", "ASC"]],
+      limit,
+      offset
     });
 
-    if (!viagem) return res.status(404).send("Viagem não encontrada");
+    const totalPaginas = Math.ceil(count / limit);
 
-    const qtdParticipantes = viagem.participantes.length;
-    const qtdAcompanhantes = viagem.participantes.reduce(
-      (soma, p) => soma + (p.acompanhante ? 1 : 0),
-      0
-    );
+    const qtdParticipantes = count;
+    const qtdAcompanhantes = rows.reduce((s, p) => s + (p.acompanhante ? 1 : 0), 0);
     const ocupacao = qtdParticipantes + qtdAcompanhantes;
 
     res.render("motorista/viagens/participantes", {
       motorista,
-      viagem,
-      participantes: viagem.participantes,
+      viagem: await Viagem.findOne({ where: { cod }, include: [{ model: Veiculo, as: "veiculo" }] }),
+      participantes: rows,
       ocupacao,
       layout: "layouts/layoutMotorista",
       paginaAtual: "viagens",
-      userType: "motorista"
+      userType: "motorista",
+      paginaNun: page,
+      totalPaginas,
+      termoPesquisa: termo
     });
+
   } catch (error) {
     console.error("Erro ao buscar participantes:", error);
     res.status(500).send("Erro ao buscar participantes da viagem");
@@ -432,10 +463,8 @@ exports.renderRelatorio = async (req, res) => {
 exports.salvarRelatorio = async (req, res) => {
   try {
     const { cod } = req.params;
-    let { combustivel, km_inicial, km_final, paradas, obs, horario_chega} = req.body;
+    let { km_inicial, km_final, paradas, obs, horario_chega} = req.body;
 
-    combustivel = parseFloat(combustivel);
-    if (isNaN(combustivel)) combustivel = null;
 
     km_inicial = km_inicial ? Number(km_inicial) : null;
     km_final   = km_final ? Number(km_final) : null;
@@ -446,7 +475,7 @@ exports.salvarRelatorio = async (req, res) => {
     const statusID = 3;
 
     await Viagem.update(
-      { combustivel, km_inicial, km_final, paradas, obs, horario_chega, statusID },
+      { km_inicial, km_final, paradas, obs, horario_chega, statusID },
       { where: { cod } }
     );
 

@@ -20,7 +20,7 @@
       <p><strong>Status:</strong> <%= viagem.status.descricao %></p>
       <hr>
 
-      <a href="/admin/viagens/participantes/<%= viagem.cod %>" class="botao-visualizar">Participantes</a>
+      <a href="/admin/viagens/participantes/<%= viagem.cod %>?origem=calendario" class="botao-visualizar">Participantes</a>
       <br>
     </div>
 
@@ -31,8 +31,6 @@
        <p><strong>Km Inicial:</strong> <%= viagem.km_inicial %></p>
       <hr>
       <p><strong>Km Final:</strong> <%= viagem.km_final %></p>
-      <hr>
-      <p><strong>Combustível:</strong> <%= viagem.combustivel || '—' %></p>
       <hr>
       <p><strong>Paradas:</strong> <%= viagem.paradas %></p>
       <hr>

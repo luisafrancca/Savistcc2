@@ -23,7 +23,7 @@ const { removerViagensCanceladasPassadas } = require("../utils/cronViagens");
 
 /*async function inserirChefeAutomatico() {
   try {
-    const matricula = 0000;
+    const matricula = 5555;
     const senha = '12345Be!';
     const nome = 'Administrador';
 
@@ -42,7 +42,7 @@ const { removerViagensCanceladasPassadas } = require("../utils/cronViagens");
 }
 
 
-inserirChefeAutomatico();*/
+inserirChefeAutomatico(); */
 
 exports.renderPerfil = async (req, res) => {
   try {
@@ -823,29 +823,63 @@ exports.cancelarViagem = async (req, res) => {
 exports.verParticipantes = async (req, res) => {
   try {
     const cod = req.params.cod;
+    const origem = req.query.origem;
+    // Busca viagem e veículo
+    const viagem = await Viagem.findByPk(cod, {
+      include: [{ model: Veiculo, as: 'veiculo' }]
+    });
 
-    const viagem = await Viagem.findByPk(cod, { include: [{ model: Veiculo, as: 'veiculo' }] });
     if (!viagem) return res.status(404).send('Viagem não encontrada');
 
-    const participantes = await Participante.findAll({
-      where: { viagemId: cod },
+    // ----- PAGINAÇÃO -----
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const offset = (page - 1) * limit;
+
+    // ----- PESQUISA -----
+    const termo = req.query.q ? req.query.q.trim() : '';
+    const whereCondition = termo
+      ? {
+          viagemId: cod,
+          [Sequelize.Op.or]: [
+            { '$Usuario.nome$': { [Sequelize.Op.like]: `%${termo}%` } },
+            { '$Usuario.CPF$': { [Sequelize.Op.like]: `%${termo}%` } }
+          ]
+        }
+      : { viagemId: cod };
+
+    // ----- BUSCA DOS PARTICIPANTES -----
+    const { count, rows } = await Participante.findAndCountAll({
+      where: whereCondition,
       include: [
         { model: Usuario, include: [{ model: Genero }, { model: Endereco }] },
         { model: Acompanhante, as: 'acompanhante', include: [{ model: Genero }] }
       ],
-      order: [['cod', 'ASC']]
+      order: [['cod', 'ASC']],
+      limit,
+      offset
     });
 
-    const qtdParticipantes = participantes.length;
-    const qtdAcompanhantes = participantes.reduce((s, p) => s + (p.acompanhante ? 1 : 0), 0);
+    const totalPaginas = Math.ceil(count / limit);
+
+    // ---- CÁLCULOS ----
+    const qtdParticipantes = count;
+    const qtdAcompanhantes = rows.reduce(
+      (s, p) => s + (p.acompanhante ? 1 : 0),
+      0
+    );
     const ocupacao = qtdParticipantes + qtdAcompanhantes;
 
     res.render('admin/viagens/participantes', {
       viagem,
-      participantes,
+      participantes: rows,
       ocupacao,
       paginaAtual: 'viagens',
-      layout: 'layouts/layoutAdmin'
+      layout: 'layouts/layoutAdmin',
+      paginaNun: page,
+      totalPaginas,
+      termoPesquisa: termo,
+      origem
     });
   } catch (error) {
     console.error(error);
@@ -1446,9 +1480,11 @@ exports.aceitarSolicitacoe = async (req, res) => {
 };
 
 exports.renderVeiculos = async (req, res) => {
+  const origem = req.query.origem; 
   const veiculos = await Veiculo.findAll();
 
   res.render("admin/viagens/gerenciar/veiculos", {
+      origem,
       veiculos,
       layout: "layouts/layoutAdmin",
       paginaAtual: "viagens",
@@ -1489,9 +1525,11 @@ exports.excluirVeiculo = async (req, res) => {
 };
 
 exports.renderCidades = async (req, res) => {
+  const origem = req.query.origem; 
   const cidades = await CidadeConsul.findAll();
 
   res.render("admin/viagens/gerenciar/cidades", {
+      origem,
       cidades,
       layout: "layouts/layoutAdmin",
       paginaAtual: "viagens",

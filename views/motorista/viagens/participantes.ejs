@@ -1,37 +1,36 @@
 <div class="container mt-4">
   <h1>Lista de participantes</h1>
 
-  <div class="row justify-content-center mb-2">
-    
-    <!-- Barra de pesquisa + botão -->
-    <div class="d-flex justify-content-center align-items-center mb-3" style="gap: 10px">
+  <div class="d-flex justify-content-center align-items-center mb-3" style="gap: 10px">
+    <form 
+      action="/motorista/viagens/participantes/<%= viagem.cod %>" 
+      method="GET" 
+      class="d-flex" 
+      style="gap: 10px;"
+    >
       <input
         type="search"
-        id="pesquisa"
-        placeholder="Pesquisar usuário por nome ou CPF"
+        name="q"
+        value="<%= termoPesquisa %>"
+        placeholder="Pesquisar participante por nome ou CPF"
         class="form-control pesquisa-custom"
       />
-    </div>
-
-    <!-- Aviso abaixo -->
-    <% if (viagem.veiculo?.lugares_dispo <= ocupacao) { %>
-      <div class="text-center" style="color: #9d1421;"> 
-        Essa viagem atingiu o limite de participantes.
-      </div>
-    <% } %>
+    </form>
   </div>
+
+  <% if (viagem.veiculo?.lugares_dispo <= ocupacao) { %>
+    <div class="text-center" style="color: #9d1421;">
+      Essa viagem atingiu o limite de participantes.
+    </div>
+  <% } %>
 </div>
 
 <% if (participantes && participantes.length > 0) { %>
   <% participantes.forEach(function(participante) { %>
-    
-    
-    <!-- Card do participante -->
     <div class="col-12 d-flex justify-content-center">
       <div class="card p-3 shadow-sm mt-2" style="width: 100%; max-width: 720px; background-color: #d1e3fd">
         <div class="d-flex flex-row align-items-center">
-          <img src="<%= participante.Usuario.img ? '/uploads/' + participante.Usuario.img : '/assets/default-profile.jpg' %>"
-               alt="Foto de perfil" class="foto-perfil me-3" />
+          <img src="<%= participante.Usuario.img ? '/uploads/' + participante.Usuario.img : '/assets/default-profile.jpg' %>" alt="Foto de perfil" class="foto-perfil me-3" />
           <div class="flex-grow-1">
             <h5 class="nome-perfil mb-0"><%= participante.Usuario.nome %></h5>
           </div>
@@ -39,48 +38,48 @@
         </div>
 
         <div class="detalhes">
-          <!-- DADOS DA VIAGEM -->
           <div class="dados-viagem">
             <p><strong>Hospital: </strong> <%= participante.local_consul %></p>
             <hr />
-            <p><strong>Hora: </strong> <%= participante.hora_consul.slice(0,5) %></p>
+            <p><strong>Horário da Consulta: </strong> <%= participante.hora_consul.slice(0,5) %></p>
             <hr />
             <p><strong>Objetivo: </strong> <%= participante.objetivo %></p>
             <hr />
-            <p><strong>Observação: </strong> <%= participante.obs %></p>
-            <hr />
+            <% if (participante.obs) { %>
+              <p><strong>Observação: </strong> <%= participante.obs %></p>
+              <hr />
+            <% } %>
             <% if (participante.encaminhamento) { %>
               <a href="/uploads/<%= participante.encaminhamento %>" target="_blank" class="botao-visualizar">Encaminhamento</a>
             <% } else { %>
               <span class="text-muted" style="font-size: 13px">Não enviado</span>
             <% } %>
-            <hr />
           </div>
 
-          <!-- DADOS DO USUÁRIO (inicialmente escondidos) -->
           <div class="dados-usuario" style="display: none">
             <p><strong>Data de Nascimento: </strong><%= participante.Usuario.data_nasc.split('-').reverse().join('/') %></p>
             <hr />
-            <p><strong>CPF: </strong><span class="cpf-perfil"><%= participante.Usuario.CPF.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/,"$1.$2.$3-$4") %></span></p>
+            <p><strong>CPF: </strong><%= participante.Usuario.CPF.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/,"$1.$2.$3-$4") %></p>
             <hr />
             <p><strong>Gênero: </strong> <%= participante.Usuario.genero.descricao %></p>
             <hr />
-            <p><strong>Email: </strong> <%= participante.Usuario.email %></p>
-            <hr />
+            <% if (participante.Usuario.email) { %>
+              <p><strong>Email: </strong> <%= participante.Usuario.email %></p>
+              <hr />
+            <% } %>
             <p><strong>Telefone: </strong> <%= participante.Usuario.fone.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1)$2-$3") %></p>
             <hr />
             <p><strong>Endereço: </strong>
-              <%= participante.Usuario.endereco?.rua || '' %>,
-              <%= participante.Usuario.endereco?.numero || '' %> -
-              <%= participante.Usuario.endereco?.bairro || '' %> -
-              <%= participante.Usuario.endereco?.cidade || '' %>
-              (<%= participante.Usuario.endereco?.UF || '' %>)
+              <%= participante.Usuario.endereco?.rua || '' %>, <%= participante.Usuario.endereco?.numero || '' %> - 
+              <%= participante.Usuario.endereco?.bairro || '' %> - <%= participante.Usuario.endereco?.cidade || '' %> 
+              (<%= participante.Usuario.endereco?.UF || '' %>) 
               CEP: <%= participante.Usuario.endereco?.CEP ? participante.Usuario.endereco.CEP.replace(/^(\d{5})(\d{3})$/,"$1-$2") : '' %>
             </p>
             <hr />
             <p><strong>SUS: </strong> <%= participante.Usuario.SUS %></p>
             <hr />
           </div>
+
           <div class="d-flex justify-content-end gap-3 mt-2">
             <a class="botao botao-visualizar-dados" style="cursor: pointer">Dados do Usuário</a>
           </div>
@@ -89,12 +88,10 @@
     </div>
 
     <% if (participante.acompanhante) { %>
-      <!-- Card do acompanhante -->
       <div class="col-12 d-flex justify-content-center">
         <div class="card p-3 shadow-sm mt-2" style="width: 100%; max-width: 720px; background-color: #f0f0f0">
           <div class="d-flex flex-row align-items-center">
-            <img src="<%= participante.acompanhante.img ? '/uploads/' + participante.acompanhante.img : '/assets/default-profile.jpg' %>"
-                 alt="Foto de perfil" class="foto-perfil me-3" />
+            <img src="<%= participante.acompanhante.img ? '/uploads/' + participante.acompanhante.img : '/assets/default-profile.jpg' %>" alt="Foto de perfil" class="foto-perfil me-3" />
             <div class="flex-grow-1">
               <h5 class="nome-perfil mb-0"><%= participante.acompanhante.nome %></h5>
             </div>
@@ -104,7 +101,7 @@
           <div class="detalhes">
             <div class="dados-usuario">
               <p>Acompanhante de <%= participante.Usuario.nome %></p>
-              <hr>
+              <hr />
               <p><strong>Data de Nascimento: </strong><%= participante.acompanhante.data_nasc.split('-').reverse().join('/') %></p>
               <hr />
               <p><strong>CPF: </strong><%= participante.acompanhante.cpf %></p>
@@ -118,73 +115,65 @@
         </div>
       </div>
     <% } %>
-
   <% }) %>
-  
+
+  <!-- PAGINAÇÃO -->
+  <div class="d-flex justify-content-between align-items-center mt-4" style="max-width: 700px; margin: 0 auto;">
+    <a href="#" onclick="window.history.back(); return false;" class="botao">Voltar</a>
+    <div class="d-flex justify-content-center align-items-center" style="flex-grow: 1; gap: 6px;">
+      <% if (paginaNun > 1) { %>
+        <a href="?page=<%= paginaNun - 1 %>&q=<%= termoPesquisa %>" class="botao-paginacao">‹</a>
+      <% } else { %>
+        <button class="botao-paginacao" disabled>‹</button>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPaginas; i++) { %>
+        <a href="?page=<%= i %>&q=<%= termoPesquisa %>" class="botao-paginacao <%= i === paginaNun ? 'ativo' : '' %>"><%= i %></a>
+      <% } %>
+
+      <% if (paginaNun < totalPaginas) { %>
+        <a href="?page=<%= paginaNun + 1 %>&q=<%= termoPesquisa %>" class="botao-paginacao">›</a>
+      <% } else { %>
+        <button class="botao-paginacao" disabled>›</button>
+      <% } %>
+    </div>
+    <div style="width: 70px;"></div>
+  </div>
+
 <% } else { %>
-  <p class="text-center mt-4">Não há nenhum participante vinculado a essa viagem.</p>
+  <p class="text-center text-muted mt-4">Nenhum participante encontrado.</p>
 <% } %>
 
 <script>
-  const inputPesquisa = document.getElementById("pesquisa");
-  const cards = Array.from(document.querySelectorAll(".card"));
-  const row = document.querySelector(".row");
+  document.querySelectorAll('.ver-mais-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const card = this.closest('.card');
+      const detalhes = card.querySelector('.detalhes');
+      const expandido = detalhes.classList.contains('expandido');
 
-  cards.forEach((card, index) => card.setAttribute("data-original-index", index));
-
-  inputPesquisa.addEventListener("input", function() {
-    const termo = this.value.trim().toLowerCase();
-    if (!termo) {
-      cards.forEach(card => {
-        card.style.display = "block";
-        card.setAttribute("data-relevancia", "0");
-      });
-      const fragment = document.createDocumentFragment();
-      cards.sort((a,b) => a.getAttribute("data-original-index") - b.getAttribute("data-original-index"))
-           .forEach(card => fragment.appendChild(card));
-      row.appendChild(fragment);
-    } else {
-      cards.forEach(card => {
-        const nome = card.querySelector(".nome-perfil")?.textContent.toLowerCase() || "";
-        const cpf = card.querySelector(".cpf-perfil")?.textContent.replace(/[.\-]/g, "") || "";
-        if (nome.startsWith(termo) || cpf.startsWith(termo)) card.setAttribute("data-relevancia", "1"), card.style.display = "block";
-        else if (nome.includes(termo) || cpf.includes(termo)) card.setAttribute("data-relevancia", "2"), card.style.display = "block";
-        else card.setAttribute("data-relevancia", "99"), card.style.display = "none";
-      });
-      const fragment = document.createDocumentFragment();
-      cards.filter(c => c.style.display==="block")
-           .sort((a,b) => a.getAttribute("data-relevancia") - b.getAttribute("data-relevancia"))
-           .forEach(card => fragment.appendChild(card));
-      row.appendChild(fragment);
-    }
-  });
-
-  document.querySelectorAll(".ver-mais-btn").forEach(btn => {
-    btn.addEventListener("click", function() {
-      const card = this.closest(".card");
-      const detalhes = card.querySelector(".detalhes");
-      const estaExpandido = detalhes.classList.contains("expandido");
-      if (estaExpandido) {
-        detalhes.style.height = "0px";
-        detalhes.style.marginTop = "0";
-        detalhes.classList.remove("expandido");
-        this.textContent = "Ver mais";
+      if (expandido) {
+        detalhes.style.height = '0';
+        detalhes.style.marginTop = '0';
+        detalhes.classList.remove('expandido');
+        this.textContent = 'Ver mais';
       } else {
-        detalhes.style.height = detalhes.scrollHeight + "px";
-        detalhes.style.marginTop = "16px";
-        detalhes.classList.add("expandido");
-        this.textContent = "Ver menos";
+        detalhes.style.height = detalhes.scrollHeight + 'px';
+        detalhes.style.marginTop = '16px';
+        detalhes.classList.add('expandido');
+        this.textContent = 'Ver menos';
       }
     });
   });
 
-  document.querySelectorAll(".botao-visualizar-dados").forEach(botao => {
-    botao.addEventListener("click", function() {
-      const card = this.closest(".card");
-      const dadosUsuario = card.querySelector(".dados-usuario");
-      const dadosViagem = card.querySelector(".dados-viagem");
-      const detalhes = card.querySelector(".detalhes");
+  document.querySelectorAll('.botao-visualizar-dados').forEach(botao => {
+    botao.addEventListener('click', function () {
+      const card = this.closest('.card');
+      const dadosUsuario = card.querySelector('.dados-usuario');
+      const dadosViagem = card.querySelector('.dados-viagem');
+      const detalhes = card.querySelector('.detalhes');
+
       const mostrandoUsuario = dadosUsuario?.style.display === "block";
+
       if (mostrandoUsuario) {
         dadosUsuario.style.display = "none";
         if (dadosViagem) dadosViagem.style.display = "block";
@@ -194,6 +183,7 @@
         if (dadosViagem) dadosViagem.style.display = "none";
         this.textContent = "Dados da Viagem";
       }
+
       if (detalhes.classList.contains("expandido")) {
         detalhes.style.height = "auto";
         detalhes.style.height = detalhes.scrollHeight + "px";

@@ -1,5 +1,4 @@
 <div class="col-12 d-flex flex-column align-items-center mt-4">
-  <!-- FORMULÁRIO DE PESQUISA -->
   <div class="d-flex justify-content-center align-items-center mb-4" style="gap: 10px;">
     <form method="GET" class="d-flex" style="gap:10px">
       <input 
@@ -33,17 +32,19 @@
           <%= viagem.ocupacao %>/<%= viagem.veiculo.lugares_dispo %> Lugares Ocupados
         </div>
 
-        <% const participa = viagem.participantes.some(p => p.usuarioID === codUsuario); %>
-        <% const lotada = viagem.ocupacao >= viagem.veiculo.lugares_dispo; %>
-        <% const jaSolicitou = viagensSolicitadasIDs.includes(viagem.cod); %>
+        <% const participa = viagem.participantes.some(p => p.usuarioID === codUsuario);
+            const lotada = viagem.ocupacao >= viagem.veiculo.lugares_dispo;
+            const dataViagem = new Date(viagem.data_viagem).toISOString().slice(0, 10);
+            const jaSolicitouNessaData = datasSolicitadas.includes(dataViagem);
+            const participaNessaData = datasParticipando.includes(dataViagem);%>
 
-        <% if (participa) { %>
-          <a href="#" class="botao">Participando</a>
-        <% } else if (lotada || jaSolicitou) { %>
-          <a href="#" class="botao-desabilitado disabled">Participar</a>
-        <% } else { %>
-          <a href="/usuario/agenda/formulario-participar/<%= viagem.cod %>" class="botao">Participar</a>
-        <% } %>
+          <% if (participa) { %>
+            <a href="/usuario/inicio/index" class="botao">Participando</a>
+          <% } else if (lotada || jaSolicitouNessaData || participaNessaData) { %>
+            <a class="botao-desabilitado disabled">Participar</a>
+          <% } else { %>
+            <a href="/usuario/agenda/formulario-participar/<%= viagem.cod %>" class="botao">Participar</a>
+          <% } %>
       </div>
     </div>
   <% }) %>
@@ -53,14 +54,12 @@
   <% } else { %>
     <!-- PAGINAÇÃO -->
     <div class="d-flex justify-content-center mt-4">
-      <!-- Botão Anterior -->
       <% if (paginaNun > 1) { %>
         <a href="?page=<%= paginaNun - 1 %>&cidade=<%= termoCidade %>&data=<%= termoData %>" class="botao-paginacao">‹</a>
       <% } else { %>
         <button class="botao-paginacao" disabled>‹</button>
       <% } %>
 
-      <!-- Números -->
       <% for (let i = 1; i <= totalPaginas; i++) { %>
         <a 
           href="?page=<%= i %>&cidade=<%= termoCidade %>&data=<%= termoData %>"
@@ -68,7 +67,6 @@
         ><%= i %></a>
       <% } %>
 
-      <!-- Botão Próximo -->
       <% if (paginaNun < totalPaginas) { %>
         <a href="?page=<%= paginaNun + 1 %>&cidade=<%= termoCidade %>&data=<%= termoData %>" class="botao-paginacao">›</a>
       <% } else { %>
@@ -84,7 +82,6 @@
 <% } %>
 
 <script>
-  // auto-submete a pesquisa quando escolher data
   const form = document.querySelector('form');
   const inputData = form.querySelector('input[name="data"]');
 

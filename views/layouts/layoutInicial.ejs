@@ -81,11 +81,11 @@
         text-decoration: none;
         font-weight: bold;
         border: none;
-        display: inline-block; 
-        white-space: nowrap;   
-        max-width: 100%;       
-        box-sizing: border-box; 
-        text-align: center;     
+        display: inline-block;
+        white-space: nowrap;
+        max-width: 100%;
+        box-sizing: border-box;
+        text-align: center;
       }
 
       .botao:hover {
@@ -116,13 +116,92 @@
         margin-top: 30px;
         text-align: center;
       }
-      .cadastro-sucesso {
+      .sobre-savis {
+  background-color: #00204c;
+  color: #fff;
+  padding: 100px 20px;
+  text-align: center;
+}
+
+.conteudo-sobre {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.sobre-savis h3 {
+  font-family: "League Spartan", sans-serif;
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 60px;
+  color: #fff;
+  display: inline-block;
+  overflow: hidden;
+}
+
+/* Layout dividido */
+.texto-dividido {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
+  position: relative;
+}
+
+.coluna {
+  flex: 1;
+  text-align: justify;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.linha-vertical {
+  width: 2px;
+  background-color: #fff;
+  height: auto;
+  min-height: 250px;
+  margin-top: 10px;
+  opacity: 0.3;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .texto-dividido {
+    flex-direction: column;
+  }
+
+  .linha-vertical {
+    display: none;
+  }
+
+  .coluna {
+    padding: 0 10px;
+  }
+}
+
+/* === Animação título palavra por palavra === */
+@keyframes fadeInUpWord {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.palavra {
+  display: inline-block;
+  opacity: 0;
+}
+
+      /* ===== Footer ===== */
+
+      .footer-custom {
+        background-color: #00204c;
+        color: #fff;
+        padding: 30px 20px;
         text-align: center;
-        font-family: "League Spartan", sans-serif;
-        font-size: 40px;
-        color: #00204c;
-        font-weight: bold;
-        padding-bottom: 100px;
       }
     </style>
   </head>

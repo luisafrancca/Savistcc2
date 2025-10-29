@@ -1,9 +1,8 @@
 <div class="d-flex justify-content-center align-items-start pt-5 pb-5" style="min-height: 100vh;"> 
-  <div class="card shadow rounded-4 p-5 mb-5" style="width: 100%; max-width: 600px; background-color: #fff;">
+  <div class="card shadow rounded-4 p-5 mb-3" style="width: 100%; max-width: 600px; background-color: #fff;">
     <form action="/auth/cadastro-motorista/etapa1/processar" method="POST" enctype="multipart/form-data">
       <div class="text-center mb-4">
-        <img src="/assets/logo.png" alt="Logo" style="width: 50px; height: 70px;">
-        <h5 class="mt-2 logo-nome-cadastro">Cadastro do Motorista</h5>
+        <h5 class="mt-1 logo-nome-cadastro">Cadastro do Motorista</h5>
 
         <label for="foto_perfil">
           <img id="preview_foto" src="<%= preenchido?.foto_perfil ? '/uploads/' + preenchido.foto_perfil : '/assets/default-profile.jpg' %>" 

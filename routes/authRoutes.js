@@ -15,9 +15,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.get('/entrada', authController.renderEntrada);
-router.post('/verificarUsuario', authController.verificarUsuario); 
-
 router.get('/cadastro/etapa1', authController.renderEtapa1Usuario);
 router.post('/cadastro/etapa1/processar', upload.single('foto_perfil'), authController.processarEtapa1Usuario);
 

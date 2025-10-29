@@ -100,7 +100,6 @@ exports.atualizarSenha = async (req, res) => {
   }
 };
 
-
 exports.renderInicio = async (req, res) => {
     const codUsuario = req.session.usuario.cod;
     
@@ -157,12 +156,10 @@ exports.renderAgenda = async (req, res) => {
   try {
     const codUsuario = req.session.usuario.cod;
 
-    // busca dados do usuário logado
     const usuario = await Usuario.findOne({
       where: { cod: codUsuario },
     });
 
-    // parâmetros de busca e paginação
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const offset = (page - 1) * limit;
@@ -170,22 +167,18 @@ exports.renderAgenda = async (req, res) => {
     const cidade = req.query.cidade ? req.query.cidade.trim() : "";
     const data = req.query.data || "";
 
-    // data mínima = hoje
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
-    // filtro base
     let where = {
       data_viagem: { [Op.gte]: hoje },
       statusID: [1],
     };
 
-    // se houver data informada, filtra por data exata
     if (data) {
       where.data_viagem = { [Op.between]: [data + " 00:00:00", data + " 23:59:59"] };
     }
 
-    // filtro da cidade (no include)
     const includeCidade = {
       model: CidadeConsul,
       as: "cidadeconsul",
@@ -194,7 +187,6 @@ exports.renderAgenda = async (req, res) => {
       }),
     };
 
-    // busca viagens com filtros e paginação
     const { count, rows } = await Viagem.findAndCountAll({
       where,
       include: [
@@ -208,24 +200,23 @@ exports.renderAgenda = async (req, res) => {
       distinct: true,
     });
 
-    // busca solicitações do usuário
     const solicitacoes = await Solicitacao.findAll({
       where: { usuarioID: codUsuario },
     });
 
-    // viagens que o usuário já solicitou
-    const viagensSolicitadas = rows.filter((viagem) =>
-      solicitacoes.some(
-        (sol) =>
-          sol.cidadeconsulID === viagem.cidadeconsulID &&
-          new Date(sol.data_consul).toISOString().slice(0, 10) ===
-            new Date(viagem.data_viagem).toISOString().slice(0, 10)
-      )
-    );
+    const datasSolicitadas = solicitacoes
+      .filter(sol => sol.data_consul)
+      .map(sol => new Date(sol.data_consul).toISOString().slice(0, 10));
 
-    const viagensSolicitadasIDs = viagensSolicitadas.map((v) => v.cod);
+    const viagensParticipando = await Participante.findAll({
+      where: { usuarioID: codUsuario },
+      include: [{ model: Viagem, as: "viagem" }],
+    });
 
-    // calcula ocupação
+    const datasParticipando = viagensParticipando
+      .filter(p => p.viagem && p.viagem.data_viagem)
+      .map(p => new Date(p.viagem.data_viagem).toISOString().slice(0, 10));
+
     const viagensComOcupacao = rows.map((v) => {
       const qtdParticipantes = v.participantes.length;
       const qtdAcompanhantes = v.participantes.reduce(
@@ -238,25 +229,25 @@ exports.renderAgenda = async (req, res) => {
       };
     });
 
-    // total de páginas
     const totalPaginas = Math.max(1, Math.ceil(count / limit));
 
     const solicitacaoSucesso = req.session.solicitacaoSucesso;
-    delete req.session.solicitacaoSucesso; 
+    delete req.session.solicitacaoSucesso;
 
     res.render("usuario/agenda/index", {
       usuario,
       codUsuario,
       solicitacoes,
       viagens: viagensComOcupacao,
-      viagensSolicitadasIDs,
       totalPaginas,
       paginaNun: page,
       termoCidade: cidade,
       termoData: data,
       layout: "layouts/layoutUsuario",
       paginaAtual: "agenda",
-      solicitacaoSucesso
+      solicitacaoSucesso,
+      datasSolicitadas,
+      datasParticipando,
     });
   } catch (erro) {
     console.error(erro);

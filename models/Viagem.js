@@ -32,9 +32,6 @@ const Viagem = db.sequelize.define('viagem', {
   usuarioID: {
     type: db.Sequelize.INTEGER,
   },
-  combustivel: {
-    type: db.Sequelize.FLOAT,
-  },
   km_inicial: {
     type: db.Sequelize.FLOAT,
   },

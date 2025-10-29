@@ -6,8 +6,6 @@
     style="
       width: 100px;
       height: 100px;
-      object-fit: cover;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
     "
   />
   <h1 class="nome-usuario mt-3">Bem-vindo(a), <%= usuario.nome %>!</h1>
@@ -16,7 +14,7 @@
 <!-- BLOCO CENTRAL -->
 <% if (minhas_viagens && minhas_viagens.length > 0) { %>
 <div
-  class="bloco-viagens shadow-lg rounded-4 mt-4"
+  class="bloco-viagens card shadow-sm rounded-4 mt-4"
   style="
     background-color: #f4f8ff;
     width: 90%;
@@ -24,7 +22,6 @@
     margin: 0 auto; /* Centraliza horizontalmente */
     padding: 20px;
     border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   "
 >
   <p>Próximas viagens:</p>
