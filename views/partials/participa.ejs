@@ -17,14 +17,14 @@
 
   <!-- Hospital -->
   <div class="mb-3">
-    <label class="form-label">Hospital</label>
+    <label class="form-label">Local (Hospital, Clínica...)</label>
     <input
       type="text"
       id="local_consul"
       name="local_consul"
       class="form-control <%= erros?.local_consul ? 'is-invalid' : '' %>"
       maxlength="100"
-      placeholder="Digite o Hospital da Consulta"
+      placeholder="Digite o local da consulta"
       value="<%= preenchido?.local_consul || '' %>"
     />
   </div>

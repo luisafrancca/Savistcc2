@@ -446,31 +446,34 @@ exports.requisitarParticipacao = async (req, res) => {
 };
 
 exports.renderSolicitar = async (req, res) => {
-   const codUsuario = req.session.usuario.cod;
-   const usuario = await Usuario.findOne({
-      where: { cod: codUsuario },
-    });
+  const cod = req.session.usuario.cod;
+
+  const usuario = await Usuario.findOne({
+    where: { cod },
+    include: [Genero, Endereco]
+  });
 
   const cidadeconsul = await CidadeConsul.findAll();
 
   const solicitacaoSucesso = req.session.solicitacaoSucessoNV;
   delete req.session.solicitacaoSucessoNV;
-  
-    res.render('usuario/solicitar/index', {
-      usuario,
-      cidadeconsul,
-      layout: 'layouts/layoutUsuario',
-      paginaAtual: 'solicitar',
-      preenchido: {},
-      solicitacaoSucesso
-    });
+
+  res.render('usuario/solicitar/index', {
+    usuario,
+    cidadeconsul,
+    layout: 'layouts/layoutUsuario',
+    paginaAtual: 'solicitar',
+    erros: null,
+    preenchido: {},
+    solicitacaoSucesso
+  });
 };
 
 exports.addSolicitar = async (req, res) => {
   try {
     const usuarioID = req.session.usuario.cod;
+    const cod = req.session.usuario.cod;
 
-    // Campos do formulário
     const {
       cidadeconsulID,
       local_consul,
@@ -486,41 +489,94 @@ exports.addSolicitar = async (req, res) => {
       obs
     } = req.body;
 
-    // Arquivos enviados
     const encaminhamento = req.files?.encaminhamento?.[0]?.filename || null;
     const foto_acompanhante = req.files?.foto_acompanhante?.[0]?.filename || null;
 
-    // Validação
-    let erros = [];
-    if (!cidadeconsulID) erros.push({ campo: "cidadeconsulID", msg: "Selecione uma cidade." });
-    if (!local_consul) erros.push({ campo: "local_consul", msg: "Informe o local da consulta." });
-    if (!data_consul || new Date(data_consul).setHours(0,0,0,0) < new Date().setHours(0,0,0,0))
-      erros.push({ campo: "data_consul", msg: "Informe uma data válida." });
-    if (!hora_consul) erros.push({ campo: "hora_consul", msg: "Informe o horário da consulta." });
-    if (!objetivo) erros.push({ campo: "objetivo", msg: "Informe o objetivo da consulta." });
-    if (!encaminhamento) erros.push({ campo: "encaminhamento", msg: "Envie o encaminhamento em PDF." });
+    const erros = {};
+    const preenchido = {
+      cidadeconsulID,
+      local_consul,
+      data_consul,
+      hora_consul,
+      objetivo,
+      obs,
+      temAcompanhante,
+      nome_acomp,
+      cpf_acomp,
+      data_nasc_acomp,
+      telefone_acomp,
+      generoID
+    };
+
+    if (!cidadeconsulID) erros.cidadeconsulID = true;
+    if (!local_consul?.trim()) erros.local_consul = true;
+    if (!data_consul) {
+  erros.data_consul = true;
+} else {
+  const hoje = new Date();
+  const dataViagem = new Date(data_consul);
+
+  hoje.setHours(0, 0, 0, 0);
+  dataViagem.setHours(0, 0, 0, 0);
+
+  if (dataViagem <= hoje) {
+    erros.data_consul = 'A data da viagem deve ser posterior à data atual.';
+  }
+}
+
+    if (!hora_consul) erros.hora_consul = true;
+    if (!objetivo?.trim()) erros.objetivo = true;
+    if (!encaminhamento) erros.encaminhamento = true;
 
     if (temAcompanhante === "sim") {
-      if (!nome_acomp) erros.push({ campo: "nome_acomp", msg: "Informe o nome do acompanhante." });
-      if (!cpf_acomp || cpf_acomp.replace(/\D/g,'').length !== 11)
-        erros.push({ campo: "cpf_acomp", msg: "Informe um CPF válido." });
-      if (!data_nasc_acomp) erros.push({ campo: "data_nasc_acomp", msg: "Informe a data de nascimento." });
-      if (!telefone_acomp || telefone_acomp.replace(/\D/g,'').length < 10)
-        erros.push({ campo: "telefone_acomp", msg: "Informe um telefone válido." });
-      if (!generoID) erros.push({ campo: "generoID", msg: "Selecione o gênero do acompanhante." });
+      if (!nome_acomp?.trim()) erros.nome_acomp = true;
+
+      if (!cpf_acomp?.trim()) {
+        erros.cpf_acomp = true;
+      } else {
+        const cpfLimpo = cpf_acomp.replace(/\D/g, '');
+        if (cpfLimpo.length !== 11) erros.cpf_acomp = 'CPF inválido. Verifique e tente novamente.';
+      }
+
+      if (!data_nasc_acomp) {
+        erros.data_nasc_acomp = true;
+      } else {
+        const data = new Date(data_nasc_acomp);
+        const hoje = new Date();
+        if (isNaN(data.getTime()) || data > hoje || data.getFullYear() < 1900) {
+          erros.data_nasc_acomp = 'Data de nascimento inválida. Verifique e tente novamente.';
+        }
+      }
+
+      if (!telefone_acomp?.trim()) {
+        erros.telefone_acomp = true;
+      } else {
+        const telefoneLimpo = telefone_acomp.replace(/\D/g, '');
+        if (telefoneLimpo.length < 10 || telefoneLimpo.length > 11)
+          erros.telefone_acomp = 'Telefone inválido. Verifique e tente novamente.';
+      }
+
+      if (!generoID) erros.generoID = true;
     }
 
-    if (erros.length > 0) {
+    if (Object.keys(erros).length > 0) {
+      const usuario = await Usuario.findOne({
+        where: { cod },
+        include: [Genero, Endereco]
+      });
+      const cidadeconsul = await CidadeConsul.findAll();
+
       return res.render('usuario/solicitar/index', {
-        cidadeconsul: await CidadeConsul.findAll(),
+        usuario,
+        cidadeconsul,
         layout: 'layouts/layoutUsuario',
         paginaAtual: 'solicitar',
         erros,
-        preenchido: req.body || {}
+        preenchido,
+        solicitacaoSucesso: null
       });
     }
 
-    // Criação da solicitação
     await Solicitacao.create({
       usuarioID,
       cidadeconsulID,
@@ -531,16 +587,15 @@ exports.addSolicitar = async (req, res) => {
       objetivo,
       obs: obs || null,
       statusID: null,
-      // Campos do acompanhante, se houver
       foto_acompanhante: temAcompanhante === "sim" ? foto_acompanhante : null,
       nome_acomp: temAcompanhante === "sim" ? nome_acomp : null,
-      cpf_acomp: temAcompanhante === "sim" ? cpf_acomp.replace(/\D/g,'') : null,
+      cpf_acomp: temAcompanhante === "sim" ? cpf_acomp.replace(/\D/g, '') : null,
       data_nasc_acomp: temAcompanhante === "sim" ? data_nasc_acomp : null,
       generoID: temAcompanhante === "sim" ? generoID : null,
-      telefone_acomp: temAcompanhante === "sim" ? telefone_acomp.replace(/\D/g,'') : null
+      telefone_acomp: temAcompanhante === "sim" ? telefone_acomp.replace(/\D/g, '') : null
     });
 
-   req.session.solicitacaoSucessoNV = true;
+    req.session.solicitacaoSucessoNV = true;
     res.redirect('/usuario/solicitar/index');
 
   } catch (err) {

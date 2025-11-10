@@ -33,7 +33,7 @@ const Motorista = db.sequelize.define('motorista', {
     allowNull: false
   },
   email: {
-    type: db.Sequelize.STRING(30),
+    type: db.Sequelize.STRING(255),
   },
   enderecoID: {
     type: db.Sequelize.INTEGER,

@@ -633,7 +633,7 @@ exports.renderCadastrarViagem = async (req, res) => {
     if (data_viagem) {
       const hoje = new Date();
       const dataViagem = new Date(data_viagem + "T00:00");
-      if (dataViagem <= hoje) erros.data = "A viagem deve ser marcada para uma data futura.";
+      if (dataViagem <= hoje) erros.data = "A data da viagem deve ser posterior à data atual.";
     }
 
     if (Object.keys(erros).length > 0) {
@@ -1098,7 +1098,7 @@ exports.vincularUsuario = async (req, res) => {
         viagem,
         usuario,
         cod: usuarioID,
-        layout: 'layouts/layoutUsuario',
+        layout: 'layouts/layoutAdmin',
         paginaAtual: 'agenda',
         erros,
         preenchido

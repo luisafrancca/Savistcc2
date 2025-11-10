@@ -264,10 +264,13 @@ exports.processarEtapa1Motorista = async (req, res) => {
   if (cpfExistente) erros.CPF = 'Este CPF já está cadastrado.';
 
   if (!data_nasc) erros.data_nasc = 'Data de nascimento é obrigatória.';
-  const data = new Date(data_nasc);
-  const hoje = new Date();
-  if (isNaN(data.getTime()) || data > hoje || data.getFullYear() < 1900)
-    erros.data_nasc = 'Data de nascimento inválida. Verifique e tente novamente.';
+  
+    const data = new Date(data_nasc);
+    const hoje = new Date();
+    const anoMinimo = 1900;
+
+    if (isNaN(data.getTime()) || data > hoje || data.getFullYear() < anoMinimo)
+      erros.data_nasc = 'Data de nascimento inválida. Verifique e tente novamente.';
 
   if (Object.keys(erros).length > 0) {
     return res.render('auth/cadastro-motorista/etapa1', {
@@ -475,21 +478,21 @@ exports.processarEtapa4Motorista = async (req, res) => {
 
 exports.verificarSessaoUsuario = (req, res, next) => {
   if (!req.session.usuario) {
-    return res.redirect('/auth/entrada'); 
+    return res.redirect('/'); 
   }
   next();
 };
 
 exports.verificarSessaoMotorista = (req, res, next) => {
   if (!req.session.motorista) {
-    return res.redirect('/auth/entrada');
+    return res.redirect('/');
   }
   next();
 };
 
 exports.verificarSessaoChefe = (req, res, next) => {
   if (!req.session.chefe) {
-    return res.redirect('/auth/entrada');
+    return res.redirect('/');
   }
   next();
 };
@@ -500,9 +503,9 @@ exports.logout = (req, res) => {
       if (err) {
         console.error("Erro ao destruir sessão:", err);
       }
-      res.redirect('/auth/entrada'); 
+      res.redirect('/'); 
     });
   } else {
-    res.redirect('/auth/entrada');
+    res.redirect('/');
   }
 };

@@ -79,7 +79,7 @@ exports.verificarUsuario = async (req, res) => {
         const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
 
         if (!senhaCorreta) {
-          return res.render('/', {
+          return res.render('index', {
             layout: 'layouts/layoutAuth',
             erroValidacao: 'Credenciais inválidas. Tente novamente.',
             tipoSelecionado: tipo,

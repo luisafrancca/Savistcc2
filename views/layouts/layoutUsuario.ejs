@@ -21,6 +21,15 @@
     <%- typeof head !== 'undefined' ? head : '' %>
 
     <style>
+      h1 {
+        font-family: "League Spartan", sans-serif;
+        color: #00204c;
+        font-weight: bold;
+        font-size: 30px;
+        text-align: center;
+        margin-bottom: 20px;
+        margin-top: 50px;
+      }
       body {
         font-family: Arial, sans-serif;
         background-color: #f8f9fa;
@@ -404,6 +413,95 @@
       .botao-alterar-senha:hover {
         color: #001129;
       }
+      /* FAQ */
+      .faq {
+        max-width: 750px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 20px 25px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .faq-item {
+        border-bottom: 1px solid #d1e3fd;
+        padding: 8px 0;
+      }
+
+      .faq-question {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 600;
+        color: #062352;
+        font-size: 1rem;
+        transition: color 0.3s, background 0.3s;
+        padding: 6px 2px;
+      }
+
+      .faq-question:hover {
+        color: #0a3da3;
+      }
+
+      .arrow {
+        font-size: 1.1rem;
+        transition: transform 0.3s ease;
+        color: #062352;
+      }
+
+      .faq-question.active .arrow {
+        transform: rotate(90deg);
+      }
+
+      .faq-answer {
+        display: none;
+        margin-top: 8px;
+        color: #062352;
+        padding-left: 12px;
+        font-weight: 400;
+        line-height: 1.4;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .faq-sub {
+        margin-top: 12px;
+        padding-left: 18px;
+        border-left: 2px solid #a7c9f9;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .faq {
+          padding: 15px;
+          max-width: 100%;
+        }
+
+        .faq-question span {
+          font-size: 0.95rem;
+        }
+      }
+      .arrow {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid #062352;
+      border-bottom: 2px solid #062352;
+      transform: rotate(45deg); /* seta fechada para a direita */
+      transition: transform 0.3s ease;
+      margin-left: 8px;
+    }
+
+    .faq-question.active .arrow {
+      transform: rotate(135deg); /* seta aberta para baixo */
+    }
     </style>
   </head>
   <body>

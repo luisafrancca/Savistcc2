@@ -60,7 +60,7 @@ Status.hasMany(Solicitacao, {
     onUpdate: 'CASCADE' 
 });
 
-Solicitacao.belongsTo(Acompanhante, { 
+/*Solicitacao.belongsTo(Acompanhante, { 
     foreignKey: 'acompanhanteID', 
     onDelete: 'CASCADE', 
     onUpdate: 'CASCADE' 
@@ -69,7 +69,7 @@ Acompanhante.hasMany(Solicitacao, {
     foreignKey: 'acompanhanteID', 
     onDelete: 'CASCADE', 
     onUpdate: 'CASCADE' 
-});
+});*/
 
 Solicitacao.belongsTo(CidadeConsul, { 
     foreignKey: 'cidadeconsulID', 

@@ -1,229 +1,309 @@
-<div class="col-12 d-flex justify-content-center espaco-card-edit"> 
-  <div class="card p-3 shadow-sm mt-2" style="width: 100%; max-width: 600px; background-color: #ffffff;">
-
-    <form id="formSolicitacao" action="/usuario/solicitar/add-solicitacao" method="POST" class="container mt-4" enctype="multipart/form-data" novalidate>
+<div class="col-12 d-flex justify-content-center espaco-card-edit">
+  <div
+    class="card p-3 shadow-sm mt-2"
+    style="width: 100%; max-width: 600px; background-color: #ffffff;"
+  >
+    <form
+      id="formSolicitacao"
+      action="/usuario/solicitar/add-solicitacao"
+      method="POST"
+      class="container mt-4"
+      enctype="multipart/form-data"
+      novalidate
+    >
       <h2 class="mb-4 titulo">Solicitar Agendamento</h2>
 
       <!-- Cidade -->
       <div class="mb-3">
         <label for="cidadeconsulID" class="form-label">Cidade</label>
-        <select name="cidadeconsulID" id="cidadeconsulID" class="form-control">
-          <option value="" disabled selected>Selecione uma cidade</option>
-          <% cidadeconsul.forEach(cidadeconsul => { %>
-            <option value="<%= cidadeconsul.cod %>"><%= cidadeconsul.descricao %></option>
+        <select
+          name="cidadeconsulID"
+          id="cidadeconsulID"
+          class="form-control <%= erros?.cidadeconsulID ? 'is-invalid' : '' %>"
+        >
+          <option value="" disabled <%= !preenchido?.cidadeconsulID ? 'selected' : '' %>>
+            Selecione uma cidade
+          </option>
+          <% cidadeconsul.forEach(c => { %>
+            <option
+              value="<%= c.cod %>"
+              <%= preenchido?.cidadeconsulID == c.cod ? 'selected' : '' %>>
+              <%= c.descricao %>
+            </option>
           <% }) %>
         </select>
-        <div class="text-danger small" id="erroCidade"></div>
+        <% if (typeof erros?.cidadeconsulID === 'string') { %>
+          <div class="invalid-feedback"><%= erros.cidadeconsulID %></div>
+        <% } %>
       </div>
 
       <!-- Local -->
       <div class="mb-3">
-        <label class="form-label">Local (Hospital, Clínica,...)</label>
-        <input type="text" id="local_consul" name="local_consul" class="form-control" maxlength="100" placeholder="Digite o local da Consulta. Ex.: Hospital Santa Maria">
-        <div class="text-danger small" id="erroLocal"></div>
+        <label for="local_consul" class="form-label">Local (Hospital, Clínica...)</label>
+        <input
+          type="text"
+          id="local_consul"
+          name="local_consul"
+          class="form-control <%= erros?.local_consul ? 'is-invalid' : '' %>"
+          maxlength="100"
+          placeholder="Digite o local da consulta"
+          value="<%= preenchido?.local_consul || '' %>"
+        />
+        <% if (typeof erros?.local_consul === 'string') { %>
+          <div class="invalid-feedback"><%= erros.local_consul %></div>
+        <% } %>
       </div>
 
       <!-- Data -->
       <div class="mb-3">
         <label for="data_consul" class="form-label">Data da Consulta</label>
-        <input type="date" id="data_consul" name="data_consul" class="form-control">
-        <div class="text-danger small" id="erroData"></div>
+        <input
+          type="date"
+          id="data_consul"
+          name="data_consul"
+          class="form-control <%= erros?.data_consul ? 'is-invalid' : '' %>"
+          value="<%= preenchido?.data_consul || '' %>"
+        />
+        <% if (typeof erros?.data_consul === 'string') { %>
+          <div class="invalid-feedback"><%= erros.data_consul %></div>
+        <% } %>
       </div>
 
       <!-- Horário -->
       <div class="mb-3">
         <label for="hora_consul" class="form-label">Horário da Consulta</label>
-        <input type="time" id="hora_consul" name="hora_consul" class="form-control">
-        <div class="text-danger small" id="erroHora"></div>
+        <input
+          type="time"
+          id="hora_consul"
+          name="hora_consul"
+          class="form-control <%= erros?.hora_consul ? 'is-invalid' : '' %>"
+          value="<%= preenchido?.hora_consul || '' %>"
+        />
+        <% if (typeof erros?.hora_consul === 'string') { %>
+          <div class="invalid-feedback"><%= erros.hora_consul %></div>
+        <% } %>
       </div>
 
       <!-- Encaminhamento -->
       <div class="mb-3">
-        <label for="encaminhamento" class="form-label">Encaminhamento</label>
-        <input type="file" id="encaminhamento" name="encaminhamento" accept="application/pdf" class="form-control" />
-        <div class="text-danger small" id="erroEncaminhamento"></div>
+        <label for="encaminhamento" class="form-label">Encaminhamento (PDF)</label>
+        <input
+          type="file"
+          id="encaminhamento"
+          name="encaminhamento"
+          accept="application/pdf"
+          class="form-control <%= erros?.encaminhamento ? 'is-invalid' : '' %>"
+        />
+        <% if (typeof erros?.encaminhamento === 'string') { %>
+          <div class="invalid-feedback"><%= erros.encaminhamento %></div>
+        <% } %>
       </div>
 
       <!-- Objetivo -->
       <div class="mb-3">
         <label for="objetivo" class="form-label">Objetivo da Consulta</label>
-        <input type="text" id="objetivo" name="objetivo" class="form-control" maxlength="60" placeholder="Digite o objetivo da consulta">
-        <div class="text-danger small" id="erroObjetivo"></div>
+        <input
+          type="text"
+          id="objetivo"
+          name="objetivo"
+          class="form-control <%= erros?.objetivo ? 'is-invalid' : '' %>"
+          maxlength="60"
+          placeholder="Digite o objetivo da consulta"
+          value="<%= preenchido?.objetivo || '' %>"
+        />
+        <% if (typeof erros?.objetivo === 'string') { %>
+          <div class="invalid-feedback"><%= erros.objetivo %></div>
+        <% } %>
       </div>
 
-      <!-- Observação -->
-        <div class="mb-3">
-          <label for="obs" class="form-label">Observações</label>
-          <textarea
-            id="obs"
-            name="obs"
-            class="form-control"
-            rows="3"
-            placeholder="Escreva aqui observações adicionais"
-          ></textarea>
-        </div>
+      <!-- Observações -->
+      <div class="mb-3">
+        <label for="obs" class="form-label">Observações</label>
+        <textarea
+          id="obs"
+          name="obs"
+          class="form-control"
+          rows="3"
+          placeholder="Escreva aqui observações adicionais"
+        ><%= preenchido?.obs || '' %></textarea>
+      </div>
 
       <!-- Acompanhante -->
       <div class="mb-3">
-        <div>
-          <label class="form-label me-2">Acompanhante</label>
-          <input type="radio" id="temAcompSim" name="temAcompanhante" value="sim" style="transform: scale(0.85);" onclick="toggleCamposAcomp()"/>
-          <label for="temAcompSim" style="font-size: 14px">Sim</label>
-          <input type="radio" id="temAcompNao" name="temAcompanhante" value="nao" style="transform: scale(0.85);" checked onclick="toggleCamposAcomp()"/>
-          <label for="temAcompNao" style="font-size: 14px">Não</label>
-        </div>
+        <label class="form-label me-2">Acompanhante</label>
+        <input
+          type="radio"
+          id="temAcompSim"
+          name="temAcompanhante"
+          value="sim"
+          <%= preenchido?.temAcompanhante === 'sim' ? 'checked' : '' %>
+          onclick="toggleCamposAcomp()"
+        />
+        <label for="temAcompSim" style="font-size: 14px">Sim</label>
+        <input
+          type="radio"
+          id="temAcompNao"
+          name="temAcompanhante"
+          value="nao"
+          <%= preenchido?.temAcompanhante !== 'sim' ? 'checked' : '' %>
+          onclick="toggleCamposAcomp()"
+        />
+        <label for="temAcompNao" style="font-size: 14px">Não</label>
       </div>
 
       <!-- Campos do acompanhante -->
       <div id="camposAcompanhante" style="display: none">
-
         <div class="text-center">
-      <label for="foto_acompanhante">
-        <img id="preview_foto_acompanhante" 
-            src="/assets/default-profile.jpg" 
-            alt="Foto do acompanhante"
-            class="rounded-circle mt-3 mb-2"
-            style="width: 90px; height: 90px; object-fit: cover; cursor: pointer; border: 2px solid #ccc;" />
-      </label>
-      <input type="file" id="foto_acompanhante" name="foto_acompanhante" accept="image/*" 
-            class="d-none" onchange="previewImagemAcompanhante(event)">
-      </div>
-
+          <label for="foto_acompanhante">
+            <img
+              id="preview_foto_acompanhante"
+              src="/assets/default-profile.jpg"
+              alt="Foto do acompanhante"
+              class="rounded-circle mt-3 mb-2"
+              style="width: 90px; height: 90px; object-fit: cover; cursor: pointer; border: 2px solid #ccc;"
+            />
+          </label>
+          <input
+            type="file"
+            id="foto_acompanhante"
+            name="foto_acompanhante"
+            accept="image/*"
+            class="d-none"
+            onchange="previewImagemAcompanhante(event)"
+          />
+        </div>
 
         <div class="mb-3">
           <label class="form-label">Nome</label>
-          <input type="text" id="nome_acomp" name="nome_acomp" class="form-control" maxlength="100" placeholder="Digite o nome completo do acompanhante">
-          <div class="text-danger small" id="erroNomeAcomp"></div>
+          <input
+            type="text"
+            id="nome_acomp"
+            name="nome_acomp"
+            class="form-control <%= erros?.nome_acomp ? 'is-invalid' : '' %>"
+            maxlength="100"
+            placeholder="Digite o nome completo do acompanhante"
+            value="<%= preenchido?.nome_acomp || '' %>"
+          />
         </div>
 
         <div class="mb-3">
           <label class="form-label">CPF</label>
-          <input type="text" id="cpf_acomp" name="cpf_acomp" class="form-control" maxlength="14" placeholder="Digite o CPF do acompanhante">
-          <div class="text-danger small" id="erroCpfAcomp"></div>
+          <input
+            type="text"
+            id="cpf_acomp"
+            name="cpf_acomp"
+            class="form-control <%= erros?.cpf_acomp ? 'is-invalid' : '' %>"
+            maxlength="14"
+            placeholder="Digite o CPF do acompanhante"
+            value="<%= preenchido?.cpf_acomp || '' %>"
+          />
+          <% if (typeof erros?.cpf_acomp === 'string') { %>
+            <div class="invalid-feedback"><%= erros.cpf_acomp %></div>
+          <% } %>
         </div>
 
         <div class="mb-3">
           <label class="form-label">Data de Nascimento</label>
-          <input type="date" id="data_nasc_acomp" name="data_nasc_acomp" class="form-control">
-          <div class="text-danger small" id="erroDataNascAcomp"></div>
+          <input
+            type="date"
+            id="data_nasc_acomp"
+            name="data_nasc_acomp"
+            class="form-control <%= erros?.data_nasc_acomp ? 'is-invalid' : '' %>"
+            value="<%= preenchido?.data_nasc_acomp || '' %>"
+          />
         </div>
 
         <div class="mb-3">
           <label class="form-label">Telefone</label>
-          <input type="text" id="telefone_acomp" name="telefone_acomp" class="form-control" maxlength="15" placeholder="Digite o número do acompanhante">
-          <div class="text-danger small" id="erroTelefoneAcomp"></div>
+          <input
+            type="text"
+            id="telefone_acomp"
+            name="telefone_acomp"
+            class="form-control <%= erros?.telefone_acomp ? 'is-invalid' : '' %>"
+            maxlength="15"
+            placeholder="Digite o número do acompanhante"
+            value="<%= preenchido?.telefone_acomp || '' %>"
+          />
         </div>
 
         <div class="mb-3">
           <label class="form-label">Gênero</label>
-          <select name="generoID" id="generoID" class="form-control">
-            <option value="" disabled selected>Selecione o gênero</option>
-            <option value="1" <%= preenchido?.genero == '1' ? 'selected' : '' %>>Masculino</option>
-            <option value="2" <%= preenchido?.genero == '2' ? 'selected' : '' %>>Feminino</option>
-            <option value="3" <%= preenchido?.genero == '3' ? 'selected' : '' %>>Não-binário</option>
-            <option value="4" <%= preenchido?.genero == '4' ? 'selected' : '' %>>Outro</option>
+          <select
+            name="generoID"
+            id="generoID"
+            class="form-control <%= erros?.generoID ? 'is-invalid' : '' %>"
+          >
+            <option value="" disabled <%= !preenchido?.generoID ? 'selected' : '' %>>
+              Selecione o gênero
+            </option>
+            <option value="1" <%= preenchido?.generoID == 1 ? 'selected' : '' %>>
+              Masculino
+            </option>
+            <option value="2" <%= preenchido?.generoID == 2 ? 'selected' : '' %>>
+              Feminino
+            </option>
+            <option value="3" <%= preenchido?.generoID == 3 ? 'selected' : '' %>>
+              Não-binário
+            </option>
+            <option value="4" <%= preenchido?.generoID == 4 ? 'selected' : '' %>>
+              Outro
+            </option>
           </select>
-          <div class="text-danger small" id="erroGeneroAcomp"></div>
         </div>
       </div>
 
       <div class="mb-3 d-flex justify-content-end">
         <button type="submit" class="botao">Submeter</button>
       </div>
-      </div>
     </form>
   </div>
 </div>
+
 <% if (solicitacaoSucesso) { %>
-        <script>
-          alert('Solicitação realizada com sucesso!');
-        </script>
+<script>
+  alert("Solicitação realizada com sucesso!");
+</script>
 <% } %>
+
 <script>
   function previewImagemAcompanhante(event) {
     const input = event.target;
-    const img = document.getElementById('preview_foto_acompanhante');
+    const img = document.getElementById("preview_foto_acompanhante");
     if (input.files && input.files[0]) {
       const reader = new FileReader();
-      reader.onload = function (e) {
-        img.src = e.target.result;
-      };
+      reader.onload = (e) => (img.src = e.target.result);
       reader.readAsDataURL(input.files[0]);
     }
   }
 
   function toggleCamposAcomp() {
     const sim = document.getElementById("temAcompSim").checked;
-    document.getElementById("camposAcompanhante").style.display = sim ? "block" : "none";
+    document.getElementById("camposAcompanhante").style.display = sim
+      ? "block"
+      : "none";
   }
 
-  function validarFormulario(e) {
-    e.preventDefault();
+  // Exibir automaticamente se estava marcado
+  window.addEventListener("DOMContentLoaded", () => {
+    if (document.getElementById("temAcompSim").checked) toggleCamposAcomp();
+  });
 
-    let erros = false;
-    let primeiroErro = null;
-
-    const cidade = document.getElementById("cidadeconsulID");
-    const local = document.getElementById("local_consul");
-    const data = document.getElementById("data_consul");
-    const hora = document.getElementById("hora_consul");
-    const objetivo = document.getElementById("objetivo");
-    const encaminhamento = document.getElementById("encaminhamento");
-    const genero = document.getElementById("generoID");
-
-    // Limpa erros anteriores
-    ["erroCidade","erroLocal","erroData","erroHora","erroObjetivo","erroEncaminhamento","erroNomeAcomp","erroCpfAcomp","erroDataNascAcomp","erroTelefoneAcomp","erroGeneroAcomp"].forEach(id => document.getElementById(id).innerText="");
-
-    // Validações principais
-    if(!cidade.value){ document.getElementById("erroCidade").innerText = "Selecione uma cidade."; if(!primeiroErro) primeiroErro=cidade; erros=true; }
-    if(!local.value.trim()){ document.getElementById("erroLocal").innerText = "Digite o local da consulta."; if(!primeiroErro) primeiroErro=local; erros=true; }
-
-    const hoje = new Date().setHours(0,0,0,0);
-    const dataSelecionada = new Date(data.value).setHours(0,0,0,0);
-    if(!data.value){ document.getElementById("erroData").innerText="Selecione uma data."; if(!primeiroErro) primeiroErro=data; erros=true; }
-    else if(dataSelecionada < hoje){ document.getElementById("erroData").innerText="A data não pode ser passada."; if(!primeiroErro) primeiroErro=data; erros=true; }
-
-    if(!hora.value){ document.getElementById("erroHora").innerText="Informe o horário da consulta."; if(!primeiroErro) primeiroErro=hora; erros=true; }
-    if(!objetivo.value.trim()){ document.getElementById("erroObjetivo").innerText="Informe o objetivo da consulta."; if(!primeiroErro) primeiroErro=objetivo; erros=true; }
-    if(!encaminhamento.value){ document.getElementById("erroEncaminhamento").innerText="Envie o encaminhamento em PDF."; if(!primeiroErro) primeiroErro=encaminhamento; erros=true; }
-
-    // Campos do acompanhante
-    if(document.getElementById("temAcompSim").checked){
-      const nome = document.getElementById("nome_acomp");
-      const cpf = document.getElementById("cpf_acomp");
-      const dataNasc = document.getElementById("data_nasc_acomp");
-      const telefone = document.getElementById("telefone_acomp");
-
-      ["erroNomeAcomp","erroCpfAcomp","erroDataNascAcomp","erroTelefoneAcomp","erroGeneroAcomp"].forEach(id => document.getElementById(id).innerText="");
-
-      if(!nome.value.trim()){ document.getElementById("erroNomeAcomp").innerText="Digite o nome."; if(!primeiroErro) primeiroErro=nome; erros=true; }
-      if(!cpf.value.replace(/\D/g,'')){ document.getElementById("erroCpfAcomp").innerText="Digite um CPF válido."; if(!primeiroErro) primeiroErro=cpf; erros=true; }
-      if(!dataNasc.value){ document.getElementById("erroDataNascAcomp").innerText="Informe a data de nascimento."; if(!primeiroErro) primeiroErro=dataNasc; erros=true; }
-      if(!telefone.value.replace(/\D/g,'')){ document.getElementById("erroTelefoneAcomp").innerText="Informe um telefone válido."; if(!primeiroErro) primeiroErro=telefone; erros=true; }
-      if(!genero.value){ document.getElementById("erroGeneroAcomp").innerText="Selecione o gênero."; if(!primeiroErro) primeiroErro=genero; erros=true; }
-    }
-
-    if(erros) primeiroErro.focus();
-    else e.target.submit();
-  }
-
-  document.getElementById("formSolicitacao").addEventListener("submit", validarFormulario);
-
-  // Máscaras simples
+  // Máscaras
   const cpfInput = document.getElementById("cpf_acomp");
-  cpfInput.addEventListener("input", e => {
-    let v = e.target.value.replace(/\D/g,'');
-    v=v.replace(/^(\d{3})(\d)/,'$1.$2');
-    v=v.replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3');
-    v=v.replace(/\.(\d{3})(\d)/,'.$1-$2');
+  cpfInput?.addEventListener("input", (e) => {
+    let v = e.target.value.replace(/\D/g, "");
+    v = v.replace(/^(\d{3})(\d)/, "$1.$2");
+    v = v.replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3");
+    v = v.replace(/\.(\d{3})(\d)/, ".$1-$2");
     e.target.value = v;
   });
 
   const telInput = document.getElementById("telefone_acomp");
-  telInput.addEventListener("input", e=>{
-    let v=e.target.value.replace(/\D/g,'');
-    if(v.length>10){ v=v.replace(/^(\d{2})(\d{5})(\d{4})$/,'($1) $2-$3'); }
-    else { v=v.replace(/^(\d{2})(\d{4})(\d{4})$/,'($1) $2-$3'); }
-    e.target.value=v;
+  telInput?.addEventListener("input", (e) => {
+    let v = e.target.value.replace(/\D/g, "");
+    if (v.length > 10)
+      v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+    else v = v.replace(/^(\d{2})(\d{4})(\d{4})$/, "($1) $2-$3");
+    e.target.value = v;
   });
 </script>
